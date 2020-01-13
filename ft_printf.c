@@ -1,23 +1,31 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ft_printf.c                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hbrulin <marvin@42.fr>                     +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/01/06 13:55:01 by hbrulin           #+#    #+#             */
-/*   Updated: 2020/01/06 17:10:22 by hbrulin          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdarg.h>
-#include <limits.h>
+#include <unistd.h>
+#include <stdlib.h>
 
+int ft_strlen(char *s)
+{
+	int i = 0;
+	while (s[i])
+		i++;
+	return(i);
+}
 
-int ft_strlen(char *s);
-char *ft_strnew(int size);
+char *ft_strnew(int size)
+{
+	char *s;
+	if (!(s = (char *)malloc(sizeof(char) * size + 1)))
+		return (NULL);
+	int i = 0;
+	while (size)
+	{
+		s[i] = 0;
+		i++;
+		size--;
+	}	
+	s[i] = '\0';
+	return(s);
+}
 
 char *ft_strcpy(char *dst, char *src)
 {
@@ -33,35 +41,36 @@ char *ft_strcpy(char *dst, char *src)
 char *ft_strdup(char *s)
 {
 	char *dst;
-	int len = ft_strlen(s);
-	dst = ft_strnew(len);
+	dst = ft_strnew(ft_strlen(s));
 	ft_strcpy(dst, s);
 	return(dst);
 }
 
-char *ft_fill_char(int n, char *s, int size)
+char *ft_fill_char(int n, int size, char *nb)
 {
 	int tmp;
+	int i = 0;
 	size--;
 	if (n < 0)
 	{
 		tmp = -n;
-		s[0] = '-';
+		nb[0] = '-';
 	}
-	else 
+	else
 		tmp = n;
 	if (tmp >= 10)
 	{
-		ft_fill_char(tmp / 10, s, size);
-       		s[size] = tmp % 10 + '0';
+		ft_fill_char(tmp / 10, size, nb);
+		nb[size] = tmp % 10 + '0';
 	}
 	else
-		s[size] = tmp + '0';
-	return(s);	
+		nb[size] = tmp + '0';
+	return(nb);
 }
 
 int ft_size(int n)
 {
+
 	int tmp;
 	int size = 0;
 	if (n < 0)
@@ -71,72 +80,69 @@ int ft_size(int n)
 	}
 	else
 		tmp = n;
-	while (tmp > 0) //ICI 0
+	while (tmp > 0)
 	{
 		tmp = tmp / 10;
 		size++;
 	}
-	return(size);
+	return (size);
 }
 
 char *ft_itoa(int n)
 {
-	char *s;
-
-	if (n == INT_MIN)
-		return (ft_strdup("-2147483648"));
-	if (!n || n ==0)
-		return (ft_strdup("0"));
-	int size = ft_size(n);
-	s = ft_strnew(size);
-	ft_fill_char(n, s, size);
-	return (s);
+	char *nb;
+	int size;
+	if (n == -2147483648)
+		return(ft_strdup("-2147483648"));
+	if (!n || n == 0)
+		return(ft_strdup("0"));
+	size = ft_size(n);
+	nb = ft_strnew(size);
+	return(ft_fill_char(n, size, nb));
 }
 
 int conv_hex(int n)
 {
 	if (n <= 9)
 		return (n + '0');
-	return(n - 10 + 'a'); //////!!
+	else
+		return (n - 10 + 'a');
 }
 
-char *aff_hex(unsigned int n)
+char *aff_hex(unsigned long n)
 {
+	unsigned long tmp = n;
+	char *nb;
 	int size = 0;
-	unsigned int tmp = n;
-
 	while (tmp >= 16)
 	{
 		tmp = tmp / 16;
 		size++;
 	}
-	char *s = ft_strnew(size);
+	nb = ft_strnew(size);
 	while (size >= 0)
 	{
 		tmp = n % 16;
-		s[size] = conv_hex(tmp);
+		nb[size] = conv_hex(tmp);
 		n = n / 16;
 		size--;
 	}
-	return (s);
-
+	return(nb);
 }
 
-int	ft_atoi(char *s)
+int ft_atoi(char *s)
 {
 	int i = 0;
 	int neg = 1;
 	int nb = 0;
-	while (s[i] == ' ' || s[i] == '\t' ||  s[i] == '\n' || s[i] == '\r' || s[i] == '\v' || s[i] == '\f')
-		i++;
-	if (s[i] == '+')
+	while (s[i] == '\n' || s[i] == ' ' || s[i] == '+')
 		i++;
 	if (s[i] == '-')
 	{
-		neg = -1;
 		i++;
+		neg = -1;
 	}
-	while (s[i] >= 9 && s[i] >= 0)
+	while (s[i] <= '9' && s[i] >= '0')
 	{
 		nb = nb * 10 + s[i] - '0';
 		i++;
@@ -144,61 +150,14 @@ int	ft_atoi(char *s)
 	return (nb * neg);
 }
 
-int ft_putchar(char c)
-{
-	write (1, &c, 1);
-	return (0);
-}
-
-int ft_strlen(char *s)
-{
-	int i = 0;
-	while (s[i])
-		i++;
-	return(i);
-}
-
-char *ft_substr(char *s, int start, int len)
-{
-	char *dst;
-	int i = 0;
-	dst = ft_strnew(len);
-	while (len)
-	{
-		dst[i] = s[start];
-		i++;
-		start++;
-		len--;
-	}
-	return(dst);
-}
-
-char *ft_strnew(int size)
-{
-	char *s;
-	int i = 0;
-	if (!(s = (char *)malloc(sizeof(char) * size +1)))
-		return (NULL);
-	while (size)
-	{
-		s[i] = 0;
-		i++;
-		size--;
-	}
-	s[i] = '\0';
-	return (s);
-}
-
 char *ft_strjoin(char *s1, char *s2)
 {
 	int len1 = ft_strlen(s1);
 	int len2 = ft_strlen(s2);
 	int len = len1 + len2;
-
-	char *dst = ft_strnew(len);
 	int i = 0;
 	int j = 0;
-
+	char *dst = ft_strnew(len);
 	while (s1[i])
 	{
 		dst[j] = s1[i];
@@ -215,29 +174,51 @@ char *ft_strjoin(char *s1, char *s2)
 	return(dst);
 }
 
-char get_format(char *s, int i)
+char *ft_substr(char *s, int start, int len)
 {
-	while (s[i])
+	char *dst = ft_strnew(len);
+	int i = 0;
+	while(len)
 	{
-		if (s[i] == 's' || s[i] == 'd' || s[i] == 'x')
-			return(s[i]);
+		dst[i] = s[start];
 		i++;
+		start++;
+		len--;
 	}
-	return ('0');
+	return(dst);
 }
 
 int ft_isdigit(char c)
 {
 	if (c >= 48 && c <= 57)
-		return (1);
+		return(1);
 	return(0);
 }
 
-char *get_flags(char *s, int i)
+int ft_putchar(char c)
 {
-	char *flags = ft_strnew(5);
+	write(1, &c, 1);
+	return(1);
+}
+
+char get_format(const char *s, int i)
+{
+	while (s[i])
+	{
+		if (s[i] == 's' || s[i] == 'd' || s[i] == 'x')
+			return(s[i]);
+		if (s[i] == ' ')
+			return(0);
+		i++;
+	}
+	return(0);
+}
+
+char *get_flags(const char *s, int i)
+{
+	char *flags = ft_strnew(10);
 	int j = 0;
-	while (ft_isdigit(s[i]) || s[i] == '.')
+	while(s[i] == '.' || ft_isdigit(s[i]))
 	{
 		flags[j] = s[i];
 		i++;
@@ -249,140 +230,150 @@ char *get_flags(char *s, int i)
 		free(flags);
 		flags = NULL;
 	}
-	return (flags);
+	return(flags);
 }
 
-char *ft_flags(char format, char *output, char *flags, int flag_min, int flag_zero)
+char *ft_flags(char *flags, char format, int flag_zero, int flag_neg, char *output)
 {
-	int prec_nbr = 0;
 	char *prec = ft_strnew(10);
-	int width_nbr = 0;
-	char *width = ft_strnew(10);
+	char *wdth = ft_strnew(10);
+	int p = 0;
+	int w = 0;
 	int nbr_pad = 0;
-	char *padding;
-	int flag_prec = 1;
+	int flag_prec = 0;
 
 	int i = 0;
 	while (ft_isdigit(flags[i]))
 	{
-		width[i] = flags[i];
+		wdth[i] = flags[i];
 		i++;
 	}
-	width_nbr = ft_atoi(width);
+	if (i != 0)
+		w = ft_atoi(wdth);
 	int j = 0;
 	if (flags[i] == '.')
 	{
-		i++;
 		flag_prec = 1;
+		i++;
 		while(ft_isdigit(flags[i]))
 		{
 			prec[j] = flags[i];
 			i++;
 			j++;
 		}
+		p = ft_atoi(prec);
 	}
-	prec_nbr = ft_atoi(prec);
-//	printf("%s\n", output);
-	if (flag_prec == 1 && prec_nbr == 0 && flag_zero == 1)
-		output = ft_strdup("");
-	else if (format == 's' && ft_strlen(output) > prec_nbr)
-		output = ft_substr(output, 0, prec_nbr);
-	else if (ft_strlen(output) < prec_nbr)
+	if(prec)
+		free(prec);
+	if (wdth)
+		free(wdth);
+
+	char *padding;
+	i = 0;
+	//printf("s is %s\n", output);
+	if (format == 's' && p < ft_strlen(output))
 	{
-		output = ft_substr(output, 1, ft_strlen(output));
-		nbr_pad = prec_nbr - ft_strlen(output);
-		if (flag_min == 1)
+		output = ft_substr(output, 0, p);
+		//printf("s is %s\n", output);
+	}
+	else if (flag_zero == 1 && flag_prec == 1 && p == 0)
+		output = ft_strdup("");
+	else if (p > ft_strlen(output) && (format == 'd' || format == 'x') && flag_neg == 0)
+	{
+		nbr_pad = p - ft_strlen(output);
+		padding = ft_strnew(nbr_pad);
+		while(nbr_pad)
 		{
-			padding = ft_strnew(nbr_pad + 1);
-			padding[0] = '-';
-			i = 1;
-			//nbr_pad++;
-			while (nbr_pad)
-			{
-				padding[i] = '0';
-				i++;
-				nbr_pad--;
-			}
-		//	output = ft_substr(output, 1, ft_strlen(output));
-			//printf("pad is %s\n", padding);
-		}
-		else 
-		{
-			//printf("ok");
-			padding = ft_strnew(nbr_pad);
-			i = 0;
-			while (nbr_pad)
-			{
-				padding[i] = '0';
-				i++;
-				nbr_pad--;
-			}
-			//printf("%s", padding);
+			padding[i] = '0';
+		       	i++;
+	       		nbr_pad--;
 		}
 		output = ft_strjoin(padding, output);
-		free(padding);
+		if (padding)
+			free(padding);
 	}
-	if (ft_strlen(output) < width_nbr)
+	else if (p > ft_strlen(output) - 1 && format == 'd' && flag_neg == 1) //attention sinon on ne rentre pas dans la condition
 	{
-		nbr_pad = width_nbr - ft_strlen(output);
-		padding = ft_strnew(nbr_pad);
-		i = 0;
+		nbr_pad = p - ft_strlen(output);
+		padding = ft_strnew(nbr_pad +1);
+		padding[0] = '-';
+		i = 1;
+		nbr_pad++; //du coup on augmente ici
 		while (nbr_pad)
+		{
+			padding[i] = '0';
+			i++;
+			nbr_pad--;
+		}
+		output = ft_substr(output, 1, ft_strlen(output));
+		output = ft_strjoin(padding, output);
+		if (padding)
+			free(padding);
+	}
+	i = 0;
+	if (w > ft_strlen(output))
+	{
+		nbr_pad = w - ft_strlen(output);
+		padding = ft_strnew(nbr_pad);
+		while(nbr_pad)
 		{
 			padding[i] = ' ';
 			i++;
 			nbr_pad--;
 		}
-		output = ft_strjoin(padding, output);
-		free(padding);
+		output =  ft_strjoin(padding, output);
+		
+		if (padding)
+			free(padding);
 	}
 	return(output);
 }
 
 int ft_output(char *output)
 {
-	//printf("OK\n");
 	int i = 0;
 	while (output[i])
 	{
 		ft_putchar(output[i]);
 		i++;
 	}
-	//printf("ret is %i\n", i);
-	return (i);
+	return(i);
 }
 
-int ft_printf(const char *s, ...)
+int 	ft_printf(const char *s, ...)
 {
 	int ret = 0;
-	int i = 0;
-	char format;
 	char *flags;
-	va_list ap;
+	char format;
 	char *output;
+	int i = 0;
+	va_list ap;
+	va_start(ap, s);
+	int flag_zero = 0;
+	int flag_neg = 0;
 	int d;
 	unsigned int x;
-	int flag_zero = 0;
-	int flag_min = 0;
-	va_start(ap, s);
 
-	while(s[i])
+	while (s[i])
 	{
 		if (s[i] == '%')
 		{
-			format = get_format((char *)s, i + 1);
-			flags = get_flags((char *)s, i + 1);
+			format = get_format(s, i + 1);
+			flags = get_flags(s, i + 1);
 			if (format == 's')
+			{
 				output = va_arg(ap, char *);
+				//printf("s is %s\n", output);
+			}
 			else if (format == 'd')
 			{
 				d = va_arg(ap, int);
+			//	printf("D is %d\n", d);
 				if (d == 0)
 					flag_zero = 1;
 				if (d < 0)
-					flag_min = 1;		
+					flag_neg = 1;
 				output = ft_itoa(d);
-				//printf("output is %s", output);
 			}
 			else if (format == 'x')
 			{
@@ -393,19 +384,20 @@ int ft_printf(const char *s, ...)
 			}
 			if (flags != NULL)
 			{
-				output = ft_flags(format, output, flags, flag_min, flag_zero);
+				output = ft_flags(flags, format, flag_zero, flag_neg, output);
 				i += ft_strlen(flags);
 			}
 			ret += ft_output(output);
+			flag_zero = 0;
+			flag_neg = 0;
+			if (flags)
+				free(flags);
+			//if (output)
+			//	free(output);
 			i++;
-			//printf("%i", ret);
-			if (flags == NULL)
-				free (flags);
-			free (output);
 		}
 		else
 		{
-			//printf("OK");
 			ft_putchar(s[i]);
 			ret++;
 		}
@@ -417,24 +409,28 @@ int ft_printf(const char *s, ...)
 
 int main(void)
 {
-
-	//int ret = ft_printf("%.3s\n", "bonjour");
-	//printf("%i\n", ret);
-	//ret = ft_printf("%.3s\n", "bonjour");
-	//printf("%i\n", ret);
-	int ret = ft_printf("%8x\n", 250);
-	printf("%i\n", ret);
-	ret = printf("%8x\n", 250);
-	printf("%i\n", ret);
-	//ret = ft_printf("%d\n", 0);
-	//printf("%i\n", ret);
-	//ret = ft_printf("%d\n", 0);
+	int ret;
 	//ret = ft_printf("%.d\n", 0);
 	//printf("%i\n", ret);
-	//ret = ft_printf("%d\n", 0);
-	//ret = ft_printf("%x\n", 250);
+
+	//ret = ft_printf("%.d\n", 0);
 	//printf("%i\n", ret);
-	//ret = ft_printf("%d\n", 0);
-	//ret = ft_printf("%10d\n", 5);
-	return(0);
+
+	ret = ft_printf("%10.4x\n", -150);
+	printf("%i\n", ret);
+
+	ret = printf("%10.4x\n", -150);
+	printf("%i\n", ret);
+
+	ret = ft_printf("%10x\n", 150);
+	printf("%i\n", ret);
+
+	ret = printf("%10x\n", 150);
+	printf("%i\n", ret);
+
+	ret = ft_printf("%10.2s\n", "toto");
+	ret = ft_printf("Magic %s is %5d\n", "number", 42);
+	ret = ft_printf("Hexadecimal for %d is %x\n", 42, 42);
+
+
 }
