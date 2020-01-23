@@ -1,12 +1,11 @@
 #include <unistd.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 int ft_strlen(char *s)
 {
-	int i = 0;
+	int i =0;
 	while (s[i])
 		i++;
 	return(i);
@@ -14,18 +13,18 @@ int ft_strlen(char *s)
 
 char *ft_strnew(int size)
 {
-    char *s;
-    if(!(s = (char *)malloc(sizeof(char) * size + 1)))
-        return (NULL);
-    int i = 0;
-    while (size)
-    {
-        s[i] = 0;
-        i++;
-        size--;
-    }
-    s[i] = '\0';
-    return (s);
+	char *dst;
+	int i = 0;
+	if (!(dst = (char *)malloc(sizeof(char) * size + 1)))
+		return (NULL);
+	while (size)
+	{
+		dst[i] = 0;
+		i++;
+		size--;
+	}
+	dst[i] = '\0';
+	return (dst);
 }
 
 char *ft_strcpy(char *dst, char *src)
@@ -37,14 +36,14 @@ char *ft_strcpy(char *dst, char *src)
 		i++;
 	}
 	dst[i] = '\0';
-	return(dst);
+	return (dst);
 }
 
 char *ft_strdup(char *s)
 {
 	char *dst = ft_strnew(ft_strlen(s));
 	ft_strcpy(dst, s);
-	return(dst);
+	return (dst);
 }
 
 char *ft_strjoin(char *s1, char *s2)
@@ -53,7 +52,6 @@ char *ft_strjoin(char *s1, char *s2)
 	int j = 0;
 	int len = ft_strlen(s1) + ft_strlen(s2);
 	char *dst = ft_strnew(len);
-
 	while (s1[i])
 	{
 		dst[j] = s1[i];
@@ -72,20 +70,17 @@ char *ft_strjoin(char *s1, char *s2)
 
 char *ft_substr(char *s, int start, int len)
 {
-    char *dst;
-    if (!(dst = (char *)malloc(sizeof(char) * len + 1)))
-        return(NULL);
-    int i = 0;
-    while (len)
-    {
-        dst[i] = s[start];
-        i++;
-        start++;
-        len--;
-    }
-    dst[i] = '\0';
-    return(dst);
-  }
+	int i = 0;
+	char *dst = ft_strnew(len);
+	while (len)
+	{
+		dst[i] = s[start];
+		i++;
+		start++;
+		len--;
+	}
+	return (dst);
+}
 
 char *ft_strchr(char *s, char c)
 {
@@ -101,14 +96,14 @@ char *ft_strchr(char *s, char c)
 	return (NULL);
 }
 
-int ft_fill_line(char **line, char **s, int len)
+int	ft_fill_line(char **line, char **s, int len)
 {
 	char *tmp;
 
 	if ((*s)[len] == '\n')
 	{
 		*line = ft_substr(*s, 0, len);
-		tmp = ft_strdup(*s + len + 1);
+		tmp = ft_strdup((*s) + len + 1);
 		free (*s);
 		*s = tmp;
 		if ((*s)[0] == '\0')
@@ -119,19 +114,20 @@ int ft_fill_line(char **line, char **s, int len)
 	}
 	else if ((*s)[len] == '\0')
 	{
-		ft_strdup(*s);
+		*line = ft_strdup(*s);
 		free(*s);
-		*s = NULL;
-		return (0);
+		(*s) = NULL;
+		return(0);
 	}
 	return (1);
 }
 
-int ft_return(char **line, char **s, int ret)
+int	ft_return(char **line, char **s, int ret)
 {
 	if (ret < 0)
 		return (-1);
-	else if ((ret == 0 && (*s == NULL || *s[0] == '\0')))
+	
+	else if (ret == 0 && (*s == NULL || (*s)[0] == '\0'))
 	{
 		*line = ft_strdup("");
 		return (0);
@@ -142,14 +138,14 @@ int ft_return(char **line, char **s, int ret)
 	return(ft_fill_line(line, s, len));
 }
 
-int get_next_line(char **line, int fd)
+int	get_next_line(char **line, int fd)
 {
+	char buf[BUFFER_SIZE + 1];
 	char *tmp;
-	char buf[BUFFER_SIZE +1];
-	int ret;
 	static char *s;
+	int ret;
 
-	if (line == NULL || BUFFER_SIZE <= 0 || fd < 0)
+	if (line == NULL || fd < 0 || BUFFER_SIZE <= 0)
 		return (-1);
 	while ((ret = read(fd, buf, BUFFER_SIZE)) > 0)
 	{
@@ -157,7 +153,7 @@ int get_next_line(char **line, int fd)
 		if (s == NULL)
 			s = ft_strnew(1);
 		tmp = ft_strjoin(s, buf);
-		free(s);
+		free (s);
 		s = tmp;
 		if (ft_strchr(buf, '\n'))
 			break;
@@ -169,30 +165,16 @@ int main(void)
 {
 	char *line;
 	int ret;
+	int fd;
 
-	int fd = open("txt.txt", O_RDONLY);
+	fd = open("txt.txt", O_RDONLY);
 	while ((ret = get_next_line(&line, fd)) > 0)
 	{
 		printf("%s\n", line);
 		printf("%i\n", ret);
-		free (line);
-	}
+		free(line);
+	}	
 	printf("%s\n", line);
 	printf("%i\n", ret);
-	free (line);
-	return (0);
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
